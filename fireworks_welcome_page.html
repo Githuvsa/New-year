@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Happy New Year 🎆</title>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      background: black;
+      overflow: hidden;
+      font-family: Arial, sans-serif;
+    }
+    canvas {
+      display: block;
+    }
+    .text {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      color: white;
+      font-size: 2.5rem;
+      text-align: center;
+      z-index: 2;
+      animation: fadeIn 2s ease-in-out;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+  </style>
+</head>
+<body>
+  <div class="text">🎆 Happy New Year 🎆<br/>Welcome 🎉</div>
+  <canvas id="canvas"></canvas>
+  <audio id="fireworkSound" src="https://www.soundjay.com/button/sounds/firework-explosion-1.mp3" autoplay></audio>
+
+  <script>
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    window.addEventListener('resize', () => {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    });
+
+    const fireworks = [];
+
+    class Firework {
+      constructor(x, y) {
+        this.x = x;
+        this.y = y;
+        this.particles = [];
+        for (let i = 0; i < 80; i++) {
+          this.particles.push({
+            x: x,
+            y: y,
+            angle: Math.random() * 2 * Math.PI,
+            speed: Math.random() * 5 + 2,
+            radius: 2,
+            life: 100,
+            color: `hsl(${Math.random() * 360}, 100%, 60%)`
+          });
+        }
+        this.playSound();
+      }
+
+      playSound() {
+        const sound = document.getElementById('fireworkSound').cloneNode();
+        sound.play();
+      }
+
+      update() {
+        this.particles.forEach(p => {
+          p.x += Math.cos(p.angle) * p.speed;
+          p.y += Math.sin(p.angle) * p.speed;
+          p.life--;
+        });
+        this.particles = this.particles.filter(p => p.life > 0);
+      }
+
+      draw() {
+        this.particles.forEach(p => {
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+          ctx.fillStyle = p.color;
+          ctx.fill();
+        });
+      }
+    }
+
+    function createFirework() {
+      const x = Math.random() * canvas.width;
+      const y = Math.random() * canvas.height * 0.5;
+      fireworks.push(new Firework(x, y));
+    }
+
+    function animate() {
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.2)';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      fireworks.forEach(fw => {
+        fw.update();
+        fw.draw();
+      });
+
+      requestAnimationFrame(animate);
+    }
+
+    // Initial burst when page loads
+    for (let i = 0; i < 5; i++) createFirework();
+
+    // Continuous fireworks
+    setInterval(createFirework, 800);
+
+    animate();
+  </script>
+</body>
+</html>
